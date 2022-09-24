@@ -1,0 +1,212 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Order Capture",
+    "description": "To capture order and track order status"
+  },
+  "host": "localhost:3000",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "order",
+      "description": "Endpoints"
+    }
+  ],
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "name": "api_key",
+      "in": "header"
+    },
+    "petstore_auth": {
+      "type": "oauth2",
+      "authorizationUrl": "https://petstore.swagger.io/oauth/authorize",
+      "flow": "implicit",
+      "scopes": {
+        "read_pets": "read your pets",
+        "write_pets": "modify pets in your account"
+      }
+    }
+  },
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/order/{orderId}/status": {
+      "get": {
+        "tags": [
+          "order"
+        ],
+        "description": "Endpoint to get order status.",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Order id which can be otained when create order"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Order status and process logs",
+            "schema": {
+              "$ref": "#/definitions/orderStatus"
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/order/": {
+      "post": {
+        "tags": [
+          "order"
+        ],
+        "description": "Endpoint to submit order.",
+        "parameters": [
+          {
+            "name": "newOrder",
+            "in": "body",
+            "description": "Order detail including customer id, items and totalAmount.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/newOrder"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Complete order payload including orderId",
+            "schema": {
+              "$ref": "#/definitions/order"
+            }
+          },
+          "400": {
+            "description": "Order submitted payload validation fail",
+            "schema": {
+              "$ref": "#/definitions/orderError"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "orderItem": {
+      "type": "object",
+      "properties": {
+        "productId": {
+          "type": "number",
+          "example": 456
+        },
+        "qty": {
+          "type": "number",
+          "example": 1
+        }
+      },
+      "required": [
+        "productId",
+        "qty"
+      ]
+    },
+    "order": {
+      "type": "object",
+      "properties": {
+        "orderId": {
+          "type": "number",
+          "example": 100
+        },
+        "customerId": {
+          "type": "number",
+          "example": 123
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/orderItem"
+          }
+        },
+        "totalAmount": {
+          "type": "number",
+          "example": 100.5
+        }
+      },
+      "required": [
+        "customerId",
+        "items",
+        "totalAmount"
+      ]
+    },
+    "orderError": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "number",
+          "example": 400
+        },
+        "description": {
+          "type": "string",
+          "example": "Invalid order payload"
+        }
+      },
+      "required": [
+        "status",
+        "description"
+      ]
+    },
+    "newOrder": {
+      "type": "object",
+      "properties": {
+        "customerId": {
+          "type": "number",
+          "example": 123
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/orderItem"
+          }
+        },
+        "totalAmount": {
+          "type": "number",
+          "example": 100.5
+        }
+      },
+      "required": [
+        "customerId",
+        "items",
+        "totalAmount"
+      ]
+    },
+    "orderStatus": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string",
+          "example": "Accepted"
+        },
+        "logs": {
+          "type": "array",
+          "example": [
+            "Sufficient account balance",
+            "Sufficient stock"
+          ],
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
