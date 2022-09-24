@@ -10,7 +10,15 @@
   "tags": [
     {
       "name": "order",
-      "description": "Endpoints"
+      "description": "Endpoints to capture order and check order status"
+    },
+    {
+      "name": "account",
+      "description": "Endpoint to update customer available credit"
+    },
+    {
+      "name": "stock",
+      "description": "Endpoint to update product quantity"
     }
   ],
   "schemes": [
@@ -68,7 +76,7 @@
         }
       }
     },
-    "/order/": {
+    "/order": {
       "post": {
         "tags": [
           "order"
@@ -100,6 +108,87 @@
           }
         }
       }
+    },
+    "/orders": {
+      "post": {
+        "tags": [
+          "order"
+        ],
+        "description": "Endpoint to submit multiple orders.",
+        "parameters": [
+          {
+            "name": "newOrders",
+            "in": "body",
+            "description": "Multiple order detail including customer id, items and totalAmount.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/newOrders"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Complete order payload including orderId",
+            "schema": {
+              "$ref": "#/definitions/orders"
+            }
+          }
+        }
+      }
+    },
+    "/account": {
+      "post": {
+        "tags": [
+          "account"
+        ],
+        "description": "Endpoint to customer available credit with customerId.",
+        "parameters": [
+          {
+            "name": "account",
+            "in": "body",
+            "description": "Multiple order detail including customer id, items and totalAmount.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/account"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Return updated account payload with updating time",
+            "schema": {
+              "$ref": "#/definitions/accountResponse"
+            }
+          }
+        }
+      }
+    },
+    "/stock": {
+      "post": {
+        "tags": [
+          "stock"
+        ],
+        "description": "Endpoint to update product stock quantity.",
+        "parameters": [
+          {
+            "name": "stock",
+            "in": "body",
+            "description": "Multiple order detail including customer id, items and totalAmount.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/stock"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Return updated account payload with updating time",
+            "schema": {
+              "$ref": "#/definitions/accountResponse"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -107,8 +196,8 @@
       "type": "object",
       "properties": {
         "productId": {
-          "type": "number",
-          "example": 456
+          "type": "string",
+          "example": "456"
         },
         "qty": {
           "type": "number",
@@ -120,16 +209,33 @@
         "qty"
       ]
     },
+    "orderItem2": {
+      "type": "object",
+      "properties": {
+        "productId": {
+          "type": "string",
+          "example": "789"
+        },
+        "qty": {
+          "type": "number",
+          "example": 2
+        }
+      },
+      "required": [
+        "productId",
+        "qty"
+      ]
+    },
     "order": {
       "type": "object",
       "properties": {
         "orderId": {
-          "type": "number",
-          "example": 100
+          "type": "string",
+          "example": "5d269f50-e1e2-4453-a36e-5d6830973167"
         },
         "customerId": {
-          "type": "number",
-          "example": 123
+          "type": "string",
+          "example": "aaa789"
         },
         "items": {
           "type": "array",
@@ -147,6 +253,37 @@
         "items",
         "totalAmount"
       ]
+    },
+    "orders": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "example": "5d269f50-e1e2-4453-a36e-5d6830973167"
+          },
+          "customerId": {
+            "type": "string",
+            "example": "bbb968"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/orderItem2"
+            }
+          },
+          "totalAmount": {
+            "type": "number",
+            "example": 100.5
+          }
+        },
+        "required": [
+          "customerId",
+          "items",
+          "totalAmount"
+        ]
+      }
     },
     "orderError": {
       "type": "object",
@@ -169,8 +306,8 @@
       "type": "object",
       "properties": {
         "customerId": {
-          "type": "number",
-          "example": 123
+          "type": "string",
+          "example": "aaa789"
         },
         "items": {
           "type": "array",
@@ -189,10 +326,48 @@
         "totalAmount"
       ]
     },
+    "newOrder2": {
+      "type": "object",
+      "properties": {
+        "customerId": {
+          "type": "string",
+          "example": "bbb968"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/orderItem2"
+          }
+        },
+        "totalAmount": {
+          "type": "number",
+          "example": 100.5
+        }
+      },
+      "required": [
+        "customerId",
+        "items",
+        "totalAmount"
+      ]
+    },
+    "newOrders": {
+      "type": "object",
+      "properties": {
+        "orders": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/newOrder2"
+          }
+        }
+      },
+      "required": [
+        "orders"
+      ]
+    },
     "orderStatus": {
       "type": "object",
       "properties": {
-        "description": {
+        "status": {
           "type": "string",
           "example": "Accepted"
         },
@@ -205,6 +380,96 @@
           "items": {
             "type": "string"
           }
+        }
+      }
+    },
+    "account": {
+      "type": "object",
+      "properties": {
+        "customerId": {
+          "type": "string",
+          "example": "bbb968"
+        },
+        "balance": {
+          "type": "number",
+          "example": 1000
+        }
+      },
+      "required": [
+        "customerId",
+        "balance"
+      ]
+    },
+    "accountResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "number",
+          "example": 202
+        },
+        "updatedPayload": {
+          "type": "object",
+          "properties": {
+            "customerId": {
+              "type": "string",
+              "example": "bbb968"
+            },
+            "balance": {
+              "type": "number",
+              "example": 1000
+            },
+            "updateTime": {
+              "type": "string",
+              "example": "2022-09-24T22:30:45.549Z"
+            }
+          }
+        }
+      }
+    },
+    "stock": {
+      "type": "object",
+      "properties": {
+        "productId": {
+          "type": "string",
+          "example": "456"
+        },
+        "balance": {
+          "type": "number",
+          "example": 100
+        }
+      },
+      "required": [
+        "productId",
+        "balance"
+      ]
+    },
+    "stockResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "number",
+          "example": 202
+        },
+        "updatedPayload": {
+          "type": "object",
+          "properties": {
+            "productId": {
+              "type": "string",
+              "example": "456"
+            },
+            "balance": {
+              "type": "number",
+              "example": 100
+            },
+            "updateTime": {
+              "type": "string",
+              "example": "2022-09-24T22:30:45.549Z"
+            }
+          },
+          "required": [
+            "productId",
+            "balance"
+          ]
         }
       }
     }

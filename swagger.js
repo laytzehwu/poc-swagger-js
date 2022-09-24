@@ -17,8 +17,16 @@ const doc = {
     tags: [
         {
             "name": "order",
-            "description": "Endpoints"
-        }
+            "description": "Endpoints to capture order and check order status"
+        },
+		{
+			"name": "account",
+			"description": "Endpoint to update customer available credit"
+		},
+		{
+			"name": "stock",
+			"description": "Endpoint to update product quantity"
+		},
     ],
     securityDefinitions: {
         api_key: {
@@ -38,30 +46,83 @@ const doc = {
     },
     definitions: {
 		orderItem: {
-			$productId: 456,
+			$productId: "456",
 			$qty: 1
 		},
+		orderItem2: {
+			$productId: "789",
+			$qty: 2
+		},
 		order: {
-			orderId: 100,
-			$customerId: 123,
+			orderId: "5d269f50-e1e2-4453-a36e-5d6830973167",
+			$customerId: "aaa789",
 			$items: [{ $ref: '#/definitions/orderItem'}],
 			$totalAmount: 100.50
 		},
+		orders: [{
+			orderId: "5d269f50-e1e2-4453-a36e-5d6830973167",
+			$customerId: "aaa789",
+			$items: [{ $ref: '#/definitions/orderItem'}],
+			$totalAmount: 100.50
+		},{
+			orderId: "5d269f50-e1e2-4453-a36e-5d6830973167",
+			$customerId: "bbb968",
+			$items: [{ $ref: '#/definitions/orderItem2'}],
+			$totalAmount: 100.50
+		},],
 		orderError: {
 			$status: 400,
 			$description: 'Invalid order payload'
 		},
         newOrder: {
-			$customerId: 123,
+			$customerId: "aaa789",
 			$items: [{ $ref: '#/definitions/orderItem'}],
 			$totalAmount: 100.50
         },
+		newOrder2: {
+			$customerId: "bbb968",
+			$items: [
+				{ $ref: '#/definitions/orderItem'},
+				{ $ref: '#/definitions/orderItem2'}
+			],
+			$totalAmount: 100.50
+		},
+		newOrders: {
+			$orders: [
+				{ $ref: "#/definitions/newOrder" },
+				{ $ref: "#/definitions/newOrder2" },
+			],
+		},
 		orderStatus: {
-			description: 'Accepted',
+			status: 'Accepted',
 			logs: [
 				'Sufficient account balance',
 				'Sufficient stock'
 			]
+		},
+		account: {
+			$customerId: 'bbb968',
+			$balance: 1000
+		},
+		accountResponse: {
+			code: 202,
+			updatedPayload: {
+				customerId: 'bbb968',
+				balance: 1000,
+				updateTime: new Date().toISOString()
+			}
+		},
+		stock: {
+			$productId: '456',
+			$balance: 100
+		},
+		stockResponse: {
+			code: 202,
+			updatedPayload: {
+				$productId: '456',
+				$balance: 100,
+				updateTime: new Date().toISOString()
+			}
 		}
     }
 }
